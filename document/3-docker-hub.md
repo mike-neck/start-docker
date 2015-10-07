@@ -9,13 +9,13 @@ Docker Hubでのイメージの公開と利用
 * 下記の`username`、`email`、`password`を記入した上で、「Sign Up」ボタンを押します。
 * 確認メールがくるので、そのメールに記載されているURLにアクセスして登録完了です。
 
-![Docker Hub](images/3-hub/docker-hub.png)
+![Docker Hub](images/3-hub/docker-hub.png?raw=true)
 
 ### レポジトリーの作成
 
 * Docker Hubにログインした状態で「Create Repository」ボタンを押します。
 
-![Create Repository](images/3-hub/new-repo.png)
+![Create Repository](images/3-hub/new-repo.png?raw=true)
 
 * 「Create Repository」画面で次の項目を入力し、「Create」ボタンを押します
 ** user name
@@ -24,7 +24,7 @@ Docker Hubでのイメージの公開と利用
 ** Full description(Optional)
 ** Visibility(Privateは無料版では1つまで)
 
-![Repository info](images/3-hub/repo-info.png)
+![Repository info](images/3-hub/repo-info.png?raw=true)
 
 ### Docker tagコマンドでイメージ名を変更する
 
@@ -103,7 +103,7 @@ latest: digest: sha256:e8a6f4430586e22ce6a3cc0ae96b1077d7b10a1bb7e9e3e2df3fdc979
 
 先ほどWebのUIで作成したレポジトリーの画面の「Tags」タブを開くと、イメージのサイズが表示されます。
 
-![Repository size](images/3-hub/created.png)
+![Repository size](images/3-hub/created.png?raw=true)
 
 この後は、作成したレポジトリーを`pull`します。
 
