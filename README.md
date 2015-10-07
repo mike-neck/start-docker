@@ -5,11 +5,11 @@ Docker入門
 
 次の順番でやると、ほんの少しだけDockerができるようになる
 
-* [インストール](start-docker/document/1-install.md)
-* [初めてのイメージ作ったり起動したり](start-docker/document/2-first-image.md)
-* [Docker Hub](start-docker/document/3-docker-hub.md)
-* [Dockerfile](start-docker/document/4-dockerfile.md)
-* [GitHubとDocker Hubの連携](document/5-github-dockerhub.md)
+* [インストール](start-docker/blob/master/document/1-install.md)
+* [初めてのイメージ作ったり起動したり](start-docker/blob/master/document/2-first-image.md)
+* [Docker Hub](start-docker/blob/master/document/3-docker-hub.md)
+* [Dockerfile](start-docker/blob/master/document/4-dockerfile.md)
+* [GitHubとDocker Hubの連携](document/blob/master/5-github-dockerhub.md)
 
 なお、実行環境は次のとおりだけど、Kitematicは使ったことないので、このDocker入門では扱わない
 
