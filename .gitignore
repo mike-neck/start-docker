@@ -1,0 +1,5 @@
+# Mac Specific file
+.DS_Store
+
+# vim
+*~
