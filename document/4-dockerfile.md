@@ -26,7 +26,9 @@ d3a1f33e8a5a: Pull complete
 c22013c84729: Pull complete
 d74508fb6632: Pull complete
 91e54dfb1179: Pull complete
-library/ubuntu:latest: The image you are pulling has been verified. Important: image verification is a tech preview feature and should not be relied on to provide security.
+library/ubuntu:latest: The image you are pulling has been verified. Important:
+image verification is a tech preview feature and should not be relied on to
+provide security.
 Digest: sha256:73fbe2308f5f5cb6e343425831b8ab44f10bbd77070ecdfbe4081daa4dbe3ed1
 Status: Downloaded newer image for ubuntu:latest
 Hello, from Ubuntu
