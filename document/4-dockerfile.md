@@ -3,7 +3,7 @@
 
 このドキュメントではより実践的なDockerfileの書き方や、`docker`コマンドの使い方が記述されています。
 
-`docker`コマンド
+dockerコマンド
 ===
 
 `Dockerfile`の前に、`docker`コマンドを覚えていきます。
@@ -192,7 +192,7 @@ $ docker kill b70431f3
 b70431f3
 ```
 
-`Dockerfile`
+Dockerfile
 ===
 
 次に`Dockerfile`を作っていきます。
@@ -357,4 +357,92 @@ $ docker attach 6df62c1
 <30 stats
 <30 quit
 <30 connection closed.
+```
+
+##### マップされるポート番号を指定してコンテナを起動する
+
+マップされるポート番号を`-p`オプションで指定することも可能です。例えば、ポート番号`31030`にマップする場合は次のようにコンテナを起動します。
+
+```
+docker run -d -t -p 31030:11211 mikeneck/memcached
+```
+
+### ssh接続できるコンテナを作る
+
+次にssh接続可能なコンテナを作る`Dockerfile`を作ります。
+
+---
+
+ディレクトリー
+
+```
+current/
+└── ssh
+    ├── Dockerfile
+    └── authorized_keys
+```
+
+あらかじめ、公開鍵を`ssh`ディレクトリーの中に`authorized_keys`というファイル名でコピーしておきます。
+
+`Dockerfile`
+
+```
+FROM ubuntu
+
+RUN \
+  apt-get update && \
+  apt-get install -y openssh-server && \
+  apt-get clean && \
+  mkdir -p /var/run/sshd
+
+RUN \
+  useradd -m mike && \
+  mkdir -p /home/mike/.ssh && \
+  chown mike /home/mike/.ssh && \
+  chmod 700 /home/mike/.ssh
+
+ADD ./authorized_keys /home/mike/.ssh/authorized_keys
+
+RUN \
+  chown mike /home/mike/.ssh/authorized_keys && \
+  chmod 600 /home/mike/.ssh/authorized_keys
+
+CMD ["/usr/sbin/sshd","-D"]
+```
+
+イメージの作成
+
+```
+docker build -t mikeneck/sshd ssh/
+```
+
+イメージを作成した後は`-d`と`-p 22`オプションを指定した上で、コンテナを起動します。
+
+```
+docker run -d -p 22 mikeneck/sshd
+```
+
+`docker port`または`docker ps`でマッピングされているポートを調べた上で、`ssh`で接続します。
+
+```
+$ ssh -p 32774 192.168.99.100
+The authenticity of host '[192.168.99.100]:32774 ([192.168.99.100]:32774)' can't be established.
+ECDSA key fingerprint is SHA256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '[192.168.99.100]:32774' (ECDSA) to the list of known hosts.
+Welcome to Ubuntu 14.04 LTS (GNU/Linux 3.19.0-25-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com/
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+
+$ whoami
+mike
+$ exit
+Connection to 192.168.99.100 closed.
 ```

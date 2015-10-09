@@ -3,3 +3,6 @@
 
 # vim
 *~
+
+# ssh key
+**/authorized_keys
