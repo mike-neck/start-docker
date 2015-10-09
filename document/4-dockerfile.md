@@ -446,3 +446,153 @@ mike
 $ exit
 Connection to 192.168.99.100 closed.
 ```
+
+### jdk8/maven3.3.3が乗っかっているイメージを作成する
+
+次にjdk8とmaven3.3.3がインストールされているイメージを作成します。
+
+---
+
+ディレクトリー
+
+```
+current/
+└── java8
+    ├── Dockerfile
+    └── project
+        ├── pom.xml
+        └── src
+            ├── main
+            │   ├── java
+            │   │   └── com
+            │   │       └── example
+            │   │           └── DemoApplication.java
+            │   └── resources
+            │       └── application.properties
+            └── test
+                └── java
+                    └── com
+                        └── example
+                            └── DemoApplicationTests.java
+```
+
+`Dockerfile`
+
+```
+FROM ubuntu
+
+RUN \
+  apt-get update && \
+  apt-get install -y \
+    software-properties-common \
+    unzip \
+    curl
+
+RUN \
+  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+  add-apt-repository -y ppa:webupd8team/java && \
+  apt-get update && \
+  apt-get install -y oracle-java8-installer && \
+  apt-get clean && \
+  rm -rf /var/cache/oracle-jdk8-installer
+
+RUN \
+  groupadd -r build && \
+  useradd -m -g build mvn
+
+RUN \
+  curl -L \
+    http://ftp.yz.yamagata-u.ac.jp/pub/network/apache/maven/maven-3/3.3.3/binaries/apache-maven-3.3.3-bin.zip \
+    -o /tmp/maven3.zip
+
+RUN \
+  unzip -q tmp/maven3.zip -d tmp/maven && \
+  mv tmp/maven/apache-maven-3.3.3/ opt/maven && \
+  rm -rf tmp/*
+
+USER mvn
+WORKDIR /home/mvn
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+ENV PATH=/opt/maven/bin:$PATH
+EXPOSE 8080
+
+CMD ["/bin/bash"]
+```
+
+イメージのビルド
+
+```
+docker build -t mikeneck/mvn java8
+```
+
+`java8`ディレクトリーには`project`ディレクトリーがあり、その中にmavenプロジェクトがありますので、コンテナでそのプロジェクトのテストをしてみます。
+
+```
+docker run -it -v /path/to/current/java8/project:/home/mvn/project mikeneck/mvn
+```
+
+`-v`オプションはホストのディレクトリーをコンテナ内のディレクトリーに割り当てるオプションです。上記のコマンドではマシン上の`path/to/current/java8/project`ディレクトリーをコンテナの`/home/mvn/project`ディレクトリーに割り当てます。
+
+コンテナを起動した後に、`project`ディレクトリーに移動して、`mvn test`を実行します。
+
+```
+$ cd project
+$ mvn test
+[INFO] Scanning for projects...
+Downloading: https://repo.maven.apache.org/maven2/org/springframework/boot/sprin
+g-boot-starter-parent/1.2.6.RELEASE/spring-boot-starter-parent-1.2.6.RELEASE.pom
+
+...
+
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building demo 0.0.1-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+
+...
+
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying 0 resource
+[INFO]
+[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ demo ---
+
+...
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.example.DemoApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v1.2.6.RELEASE)
+ Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.787 sec - in
+ com.example.DemoApplicationTests
+
+ Results :
+
+ Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+ [INFO] ------------------------------------------------------------------------
+ [INFO] BUILD SUCCESS
+ [INFO] ------------------------------------------------------------------------
+ [INFO] Total time: 01:13 min
+ [INFO] Finished at: 2015-10-09T07:50:32+00:00
+ [INFO] Final Memory: 22M/54M
+ [INFO] ------------------------------------------------------------------------
+$ ls -la
+total 8
+drwxr-xr-x 1 mvn staff  170 Oct  9 07:50 .
+drwxr-xr-x 5 mvn build 4096 Oct  9 07:49 ..
+-rw-r--r-- 1 mvn staff 1352 Oct  9 07:48 pom.xml
+drwxr-xr-x 1 mvn staff  136 Oct  9 07:15 src
+drwxr-xr-x 1 mvn staff  272 Oct  9 07:50 target
+```
+
+なお、コンテナに割り当てられたディレクトリー内にて生成されたファイル・ディレクトリーはマシン上のディレクトリーにも残ります。

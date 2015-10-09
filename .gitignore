@@ -6,3 +6,6 @@
 
 # ssh key
 **/authorized_keys
+
+# mvn
+**/target/
