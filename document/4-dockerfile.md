@@ -197,6 +197,10 @@ b70431f3
 
 ### memcachedの入っているubuntuのイメージ作成
 
+好みのイメージを作成する`Dockerfile`を作っていく方法です。
+
+##### `Dockerfile`からイメージの作成
+
 `ubuntu`をベースにして、`memcached`がインストールされたイメージを作成できる`Dockerfile`を
 現在のディレクトリーの下の`memcached`というディレクトリーに作成します。
 
@@ -273,4 +277,82 @@ Step 5 : USER memcache
  ---> f1b644cb1bf5
 Removing intermediate container 67d4618991a8
 Successfully built f1b644cb1bf5
+```
+
+##### コンテナの起動
+
+作成したイメージを起動するコマンドは次のとおりです。
+
+```
+docker run -d -t -p 11211 mikeneck/memcached
+```
+
+* 起動したコンテナはバックグラウンドで実行されたままにするので`-d`をつけています。
+* `-p`オプションはアクセス許可するポート番号です。
+
+実行すると次のようになります。
+
+```
+$ docker run -d -t -p 11211 mikeneck/memcached
+6df62c13588452bc23e4e2f8c46523231950fdbfc4517f17a97b90f8691d5704
+```
+
+##### ポートマッピング
+
+起動したコンテナはポート11211で接続を待機しますが、Virtual Box内部で起動しているOSからしかアクセスできません。
+Virtual Box外部(つまりMac)からアクセス可能にするためのポートが自動でマッピングされます。
+それを調べるコマンドが`docker port`コマンドです。コンテナIDとポート番号を指定して実行します。
+
+```
+$ docker port 6df62c1 11211
+0.0.0.0:32769
+```
+
+なお、このIPアドレス`0.0.0.0`はVirtual Boxで起動しているOSのものですので、Macから`localhost:32769`にアクセスしてもアクセスすることができません。
+Virtual Boxで起動しているOSのIPアドレスを調べるために`docker-machine`コマンドを使います。
+
+```
+$ docker-machine ls
+NAME      ACTIVE   DRIVER       STATE     URL                         SWARM
+default   *        virtualbox   Running   tcp://192.168.99.100:2376
+```
+
+ここに表示されているIPアドレス`192.168.99.100`がVirtual Boxで起動しているOSのIPアドレスですので、
+こちらのポート`32769`にアクセスするとコンテナの`memcached`にアクセスすることができます。
+
+```
+docker attach 6df62c1
+```
+
+でコンテナのターミナルを表示する状態にした後、新たにターミナルから`192.168.99.100:32769`に`telnet`で接続します。
+
+```
+$ telnet 192.168.99.100 32769
+Trying 192.168.99.100...
+Connected to 192.168.99.100.
+Escape character is '^]'.
+stats
+STAT pid 1
+STAT uptime 1058
+STAT time 1444358995
+STAT version 1.4.14 (Ubuntu)
+STAT libevent 2.0.21-stable
+
+...
+
+STAT reclaimed 0
+END
+quit
+Connection closed by foreign host.
+```
+
+コンテナのターミナルの方は次のように表示されています。
+
+```
+$ docker attach 6df62c1
+<30 new auto-negotiating client connection
+30: Client using the ascii protocol
+<30 stats
+<30 quit
+<30 connection closed.
 ```
